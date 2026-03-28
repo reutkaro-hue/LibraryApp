@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>הספרייה שלי</title>
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0c09;
+    --surface: #17140f;
+    --surface2: #1f1b14;
+    --surface3: #2a251c;
+    --border: #3a3228;
+    --gold: #c9a84c;
+    --gold-light: #e4c97a;
+    --gold-dim: #7a6530;
+    --cream: #f0e8d5;
+    --cream-dim: #b5a98a;
+    --red: #c0392b;
+    --green: #27ae60;
+    --blue: #2980b9;
+    --text: #e8dfc8;
+    --text-dim: #8a7d65;
+    --shadow: rgba(0,0,0,0.6);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Crimson Pro', serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background: 
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(201,168,76,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 60% at 10% 80%, rgba(201,168,76,0.04) 0%, transparent 60%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(14,12,9,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; gap: 2rem;
+    height: 64px;
+  }
+
+  .logo {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 1.5rem; font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+  .logo span { color: var(--cream-dim); font-weight: 300; font-size: 0.85em; }
+
+  .search-wrap {
+    flex: 1; position: relative; max-width: 500px;
+  }
+  .search-wrap input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Crimson Pro', serif;
+    font-size: 1rem;
+    padding: 0.5rem 1rem 0.5rem 2.5rem;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-wrap input:focus { border-color: var(--gold-dim); }
+  .search-wrap input::placeholder { color: var(--text-dim); }
+  .search-icon {
+    position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%);
+    color: var(--text-dim); font-size: 0.9rem; pointer-events: none;
+  }
+
+  .header-stats {
+    margin-right: auto;
+    display: flex; gap: 1.5rem; align-items: center;
+  }
+  .stat-pill {
+    font-size: 0.82rem; color: var(--text-dim);
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 0.25rem 0.75rem; border-radius: 20px;
+    white-space: nowrap;
+  }
+  .stat-pill strong { color: var(--gold); font-weight: 600; }
+
+  .btn-add {
+    background: var(--gold);
+    color: #0e0c09;
+    border: none; cursor: pointer;
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 0.95rem; font-weight: 700;
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
+    display: flex; align-items: center; gap: 0.4rem;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .btn-add:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+  .btn-backup {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--cream-dim); cursor: pointer;
+    font-family: 'Crimson Pro', serif; font-size: 0.9rem;
+    padding: 0.5rem 0.9rem; border-radius: 6px;
+    display: flex; align-items: center; gap: 0.35rem;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .btn-backup:hover { border-color: var(--gold-dim); color: var(--gold); transform: translateY(-1px); }
+
+  /* ─── LAYOUT ─── */
+  .app { display: flex; min-height: calc(100vh - 64px); position: relative; z-index: 1; }
+
+  /* ─── SIDEBAR ─── */
+  aside {
+    width: 220px; flex-shrink: 0;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    padding: 1.5rem 0;
+    position: sticky; top: 64px;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+
+  .sidebar-section { margin-bottom: 1.5rem; }
+  .sidebar-label {
+    font-size: 0.7rem; letter-spacing: 0.15em;
+    color: var(--text-dim); text-transform: uppercase;
+    padding: 0 1.25rem; margin-bottom: 0.5rem;
+  }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.5rem 1.25rem;
+    cursor: pointer; color: var(--cream-dim);
+    font-size: 0.95rem;
+    transition: background 0.15s, color 0.15s;
+    border-right: 3px solid transparent;
+  }
+  .sidebar-item:hover { background: var(--surface2); color: var(--text); }
+  .sidebar-item.active { 
+    background: var(--surface2); color: var(--gold);
+    border-right-color: var(--gold);
+  }
+  .sidebar-item .count {
+    margin-right: auto;
+    font-size: 0.75rem; background: var(--surface3);
+    padding: 0.1rem 0.4rem; border-radius: 10px;
+    color: var(--text-dim);
+  }
+
+  .genre-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+
+  /* ─── DUPLICATE BADGE ─── */
+  .dup-badge {
+    position: absolute; top: 0.5rem; right: 0.5rem;
+    background: rgba(192,57,43,0.85);
+    color: #fff; font-size: 0.6rem; font-weight: 700;
+    padding: 0.15rem 0.4rem; border-radius: 4px;
+    letter-spacing: 0.05em; pointer-events: none;
+  }
+  .dup-warning {
+    background: rgba(192,57,43,0.12);
+    border: 1px solid rgba(192,57,43,0.4);
+    border-radius: 6px; padding: 0.6rem 0.85rem;
+    font-size: 0.9rem; color: #e05050;
+    margin-bottom: 0.75rem; display: none;
+  }
+
+  /* ─── MAIN ─── */
+  main {
+    flex: 1; padding: 2rem;
+    overflow-y: auto;
+  }
+
+  .toolbar {
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 1.5rem; flex-wrap: wrap;
+  }
+  .toolbar-left { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+  .filter-btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--cream-dim); cursor: pointer;
+    font-family: 'Crimson Pro', serif; font-size: 0.9rem;
+    padding: 0.35rem 0.9rem; border-radius: 20px;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover { border-color: var(--gold-dim); color: var(--text); }
+  .filter-btn.active { background: var(--gold); color: #0e0c09; border-color: var(--gold); font-weight: 600; }
+
+  .sort-select {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--cream-dim); font-family: 'Crimson Pro', serif;
+    font-size: 0.9rem; padding: 0.35rem 0.75rem;
+    border-radius: 6px; outline: none; cursor: pointer;
+    margin-right: auto;
+  }
+
+  .view-toggle { display: flex; gap: 0.25rem; }
+  .view-btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text-dim); cursor: pointer;
+    padding: 0.35rem 0.6rem; border-radius: 4px;
+    font-size: 0.9rem; transition: all 0.15s;
+  }
+  .view-btn.active { background: var(--surface3); color: var(--gold); border-color: var(--gold-dim); }
+
+  /* ─── GRID / LIST ─── */
+  #books-container { }
+
+  .books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.5rem;
+  }
+  .books-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  /* ─── BOOK CARD (grid) ─── */
+  .book-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    position: relative;
+  }
+  .book-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px var(--shadow);
+    border-color: var(--gold-dim);
+  }
+  .book-cover {
+    width: 100%; aspect-ratio: 2/3;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem;
+    position: relative; overflow: hidden;
+  }
+  .book-cover-inner {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 1rem; text-align: center;
+  }
+  .book-cover-title {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 0.8rem; font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    line-height: 1.3;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+    margin-top: 0.5rem;
+  }
+  .book-cover-author {
+    font-size: 0.65rem; color: rgba(255,255,255,0.65);
+    margin-top: 0.25rem;
+    font-style: italic;
+  }
+  .book-spine { position: absolute; right: 0; top: 0; bottom: 0; width: 6px; opacity: 0.4; }
+
+  .book-info { padding: 0.75rem; }
+  .book-title {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 0.9rem; font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .book-author { font-size: 0.8rem; color: var(--text-dim); margin-top: 0.2rem; font-style: italic; }
+
+  .book-meta { 
+    display: flex; gap: 0.4rem; margin-top: 0.5rem; flex-wrap: wrap; align-items: center;
+  }
+  .status-badge {
+    font-size: 0.65rem; padding: 0.15rem 0.45rem; border-radius: 10px;
+    font-weight: 600; letter-spacing: 0.05em;
+  }
+  .status-read { background: rgba(39,174,96,0.2); color: #5ddb8a; }
+  .status-reading { background: rgba(41,128,185,0.2); color: #5aaddb; }
+  .status-unread { background: rgba(90,80,60,0.3); color: #b5a98a; }
+  .status-wishlist { background: rgba(201,168,76,0.15); color: var(--gold); }
+
+  .rating-stars { font-size: 0.65rem; color: var(--gold); }
+
+  .card-fav {
+    position: absolute; top: 0.5rem; left: 0.5rem;
+    background: rgba(14,12,9,0.7);
+    border: none; cursor: pointer; color: var(--gold);
+    font-size: 0.85rem; padding: 0.2rem 0.3rem;
+    border-radius: 4px; opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .book-card:hover .card-fav { opacity: 1; }
+  .card-fav.fav { opacity: 1; color: #e74c3c; }
+
+  /* ─── BOOK ROW (list) ─── */
+  .book-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    display: flex; align-items: center; gap: 1rem;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .book-row:hover { border-color: var(--gold-dim); background: var(--surface2); }
+  .row-emoji { font-size: 1.5rem; flex-shrink: 0; }
+  .row-main { flex: 1; min-width: 0; }
+  .row-title {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 1rem; font-weight: 700; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .row-sub { font-size: 0.85rem; color: var(--text-dim); font-style: italic; }
+  .row-genre { font-size: 0.75rem; color: var(--cream-dim); }
+  .row-right { display: flex; align-items: center; gap: 1rem; flex-shrink: 0; }
+  .row-year { font-size: 0.8rem; color: var(--text-dim); }
+
+  /* ─── EMPTY ─── */
+  .empty-state {
+    text-align: center; padding: 5rem 2rem;
+    color: var(--text-dim);
+  }
+  .empty-state .empty-icon { font-size: 4rem; margin-bottom: 1rem; }
+  .empty-state h3 { font-family: 'Frank Ruhl Libre', serif; font-size: 1.5rem; color: var(--cream-dim); margin-bottom: 0.5rem; }
+
+  /* ─── MODAL ─── */
+  .overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7); z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem;
+    animation: fadeIn 0.2s;
+  }
+  @keyframes fadeIn { from { opacity: 0; } }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 100%; max-width: 560px;
+    max-height: 90vh; overflow-y: auto;
+    animation: slideUp 0.25s ease;
+    position: relative;
+  }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } }
+
+  .modal-header {
+    padding: 1.5rem 1.5rem 0;
+    display: flex; align-items: flex-start; gap: 1rem;
+  }
+  .modal-cover-preview {
+    width: 70px; height: 105px;
+    border-radius: 4px; overflow: hidden; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+  }
+  .modal-title-group { flex: 1; }
+  .modal-book-title {
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 1.4rem; font-weight: 900; color: var(--gold);
+    line-height: 1.2;
+  }
+  .modal-book-author { font-size: 1rem; color: var(--cream-dim); font-style: italic; margin-top: 0.25rem; }
+  .modal-close {
+    background: none; border: none; color: var(--text-dim);
+    cursor: pointer; font-size: 1.2rem; padding: 0.25rem;
+    line-height: 1; position: absolute; top: 1rem; left: 1rem;
+    transition: color 0.15s;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .modal-body { padding: 1.25rem 1.5rem 1.5rem; }
+
+  .modal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-label { font-size: 0.75rem; letter-spacing: 0.1em; color: var(--text-dim); text-transform: uppercase; }
+  .form-input, .form-select, .form-textarea {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); font-family: 'Crimson Pro', serif; font-size: 1rem;
+    padding: 0.5rem 0.75rem; border-radius: 6px; outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--gold-dim); }
+  .form-textarea { resize: vertical; min-height: 80px; }
+
+  .rating-input { display: flex; gap: 0.3rem; }
+  .star-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 1.3rem; color: var(--surface3);
+    transition: color 0.1s, transform 0.1s;
+    padding: 0;
+  }
+  .star-btn:hover, .star-btn.lit { color: var(--gold); }
+  .star-btn:hover { transform: scale(1.2); }
+
+  .modal-actions {
+    display: flex; gap: 0.75rem; margin-top: 1.25rem; justify-content: flex-end;
+  }
+  .btn-cancel {
+    background: none; border: 1px solid var(--border);
+    color: var(--cream-dim); cursor: pointer;
+    font-family: 'Crimson Pro', serif; font-size: 1rem;
+    padding: 0.5rem 1.25rem; border-radius: 6px;
+    transition: all 0.15s;
+  }
+  .btn-cancel:hover { border-color: var(--text-dim); color: var(--text); }
+  .btn-save {
+    background: var(--gold); color: #0e0c09;
+    border: none; cursor: pointer;
+    font-family: 'Frank Ruhl Libre', serif; font-size: 1rem; font-weight: 700;
+    padding: 0.5rem 1.5rem; border-radius: 6px;
+    transition: background 0.15s;
+  }
+  .btn-save:hover { background: var(--gold-light); }
+  .btn-delete {
+    background: none; border: 1px solid #5a2020;
+    color: #e05050; cursor: pointer;
+    font-family: 'Crimson Pro', serif; font-size: 1rem;
+    padding: 0.5rem 1rem; border-radius: 6px;
+    margin-left: 0; margin-right: auto;
+    transition: all 0.15s;
+  }
+  .btn-delete:hover { background: rgba(192,57,43,0.15); border-color: var(--red); }
+
+  /* detail modal */
+  .detail-stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;
+    margin: 1rem 0;
+  }
+  .detail-stat {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0.75rem; text-align: center;
+  }
+  .detail-stat-val { font-size: 1.2rem; font-weight: 700; color: var(--gold); font-family: 'Frank Ruhl Libre', serif; }
+  .detail-stat-lbl { font-size: 0.7rem; color: var(--text-dim); margin-top: 0.25rem; }
+  .detail-notes {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1rem; font-size: 0.95rem;
+    color: var(--cream-dim); font-style: italic; line-height: 1.6;
+  }
+  .detail-actions { display: flex; gap: 0.75rem; margin-top: 1.25rem; }
+  .btn-edit {
+    flex: 1; background: var(--gold); color: #0e0c09;
+    border: none; cursor: pointer;
+    font-family: 'Frank Ruhl Libre', serif; font-size: 1rem; font-weight: 700;
+    padding: 0.6rem; border-radius: 6px;
+    transition: background 0.15s;
+  }
+  .btn-edit:hover { background: var(--gold-light); }
+
+  /* ─── TOAST ─── */
+  .toast {
+    position: fixed; bottom: 2rem; right: 50%; transform: translateX(50%);
+    background: var(--surface3); border: 1px solid var(--gold-dim);
+    color: var(--text); font-family: 'Crimson Pro', serif; font-size: 0.95rem;
+    padding: 0.6rem 1.25rem; border-radius: 8px;
+    z-index: 500; animation: toastIn 0.3s ease;
+  }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(50%) translateY(10px); } }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-wrap { background: var(--surface3); border-radius: 4px; height: 4px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius: 4px; transition: width 0.5s; }
+
+  /* ─── SCAN MODAL ─── */
+  .scan-drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface2);
+    position: relative;
+  }
+  .scan-drop-zone:hover, .scan-drop-zone.drag-over {
+    border-color: var(--gold-dim);
+    background: rgba(201,168,76,0.05);
+  }
+  .scan-drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .scan-drop-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .scan-drop-text { color: var(--cream-dim); font-size: 1rem; }
+  .scan-drop-sub { color: var(--text-dim); font-size: 0.85rem; margin-top: 0.3rem; }
+
+  .scan-preview-img {
+    width: 100%; max-height: 200px; object-fit: cover;
+    border-radius: 8px; margin-bottom: 1rem;
+    border: 1px solid var(--border);
+  }
+
+  .scan-results { display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1rem; }
+  .scan-result-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.85rem 1rem;
+    display: flex; align-items: center; gap: 1rem;
+    transition: border-color 0.15s;
+  }
+  .scan-result-item.selected { border-color: var(--gold); background: rgba(201,168,76,0.07); }
+  .scan-result-item label { display: flex; align-items: center; gap: 1rem; cursor: pointer; flex: 1; }
+  .scan-result-info { flex: 1; }
+  .scan-result-title { font-family: 'Frank Ruhl Libre', serif; font-weight: 700; color: var(--text); font-size: 0.95rem; }
+  .scan-result-sub { font-size: 0.82rem; color: var(--text-dim); margin-top: 0.15rem; font-style: italic; }
+  .scan-result-tags { display: flex; gap: 0.4rem; margin-top: 0.4rem; flex-wrap: wrap; }
+  .scan-tag { font-size: 0.7rem; padding: 0.1rem 0.5rem; border-radius: 10px; background: var(--surface3); color: var(--cream-dim); }
+
+  .scan-location-row {
+    display: flex; align-items: center; gap: 0.75rem;
+    margin-top: 0.75rem; padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+  .scan-location-row label { font-size: 0.8rem; color: var(--text-dim); white-space: nowrap; }
+
+  .scan-status {
+    text-align: center; padding: 2rem;
+    color: var(--text-dim); font-size: 0.95rem;
+  }
+  .scan-spinner {
+    display: inline-block; width: 28px; height: 28px;
+    border: 3px solid var(--border); border-top-color: var(--gold);
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+    margin-bottom: 0.75rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .scan-select-all {
+    font-size: 0.85rem; color: var(--gold); cursor: pointer;
+    background: none; border: none; font-family: 'Crimson Pro', serif;
+    padding: 0; text-decoration: underline;
+  }
+
+  /* ─── AUTOCOMPLETE ─── */
+  .autocomplete-list {
+    position: absolute; top: 100%; right: 0; left: 0; z-index: 300;
+    background: var(--surface2);
+    border: 1px solid var(--gold-dim);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    max-height: 180px; overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .autocomplete-item {
+    padding: 0.5rem 0.85rem;
+    cursor: pointer; font-size: 0.95rem; color: var(--cream-dim);
+    transition: background 0.1s;
+  }
+  .autocomplete-item:hover, .autocomplete-item.focused {
+    background: var(--surface3); color: var(--gold);
+  }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 700px) {
+    aside { touch-action: manipulation; }
+    .sidebar-item { touch-action: manipulation; cursor: pointer; min-height: 44px; }
+    header { flex-wrap: wrap; gap: 0.5rem; padding: 0.75rem 1rem; }
+    .logo span { display: none; }
+    .search-wrap { order: 3; width: 100%; max-width: 100%; }
+    .header-stats { display: none; }
+    .btn-backup { font-size: 0.75rem; padding: 0.3rem 0.5rem; }
+    .btn-add { font-size: 0.85rem; padding: 0.4rem 0.75rem; }
+    .app { flex-direction: column; }
+    aside { 
+      display: none; 
+      width: 100%;
+      border-left: none;
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+    }
+    aside.open { display: block; }
+    main { padding: 1rem; }
+    .books-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.75rem; }
+    .toolbar { flex-wrap: wrap; gap: 0.5rem; }
+    #mobile-menu-btn { display: flex !important; }
+  }
+  #mobile-menu-btn { display: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">📚 <span>הספרייה</span> שלי</div>
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="search-input" placeholder="חפש לפי שם, מחבר, ז׳אנר..." oninput="renderBooks()" onkeyup="renderBooks()">
+  </div>
+  <div class="header-stats">
+    <div class="stat-pill">סה״כ <strong id="stat-total">0</strong> ספרים</div>
+    <div class="stat-pill">נקרא <strong id="stat-read">0</strong></div>
+    <div class="stat-pill">קורא כעת <strong id="stat-reading">0</strong></div>
+  </div>
+  <button class="btn-backup" onclick="openScanModal()" title="סרוק ספרים מתמונה" style="background:rgba(201,168,76,0.1);border-color:var(--gold-dim);color:var(--gold)">📷 סרוק ספרים</button>
+  <button class="btn-backup" onclick="exportBooks()" title="ייצא לקובץ JSON — שמור ב-Google Drive">☁️ גיבוי</button>
+  <button class="btn-backup" onclick="document.getElementById('import-file').click()" title="ייבא קובץ גיבוי">📂 שחזור</button>
+  <input type="file" id="import-file" accept=".json" style="display:none" onchange="importBooks(event)">
+  <button class="btn-add" onclick="openAddModal()">+ הוסף ספר</button>
+  <button id="mobile-menu-btn" onclick="toggleMobileMenu()" style="background:rgba(201,168,76,0.1);border:1px solid var(--gold-dim);color:var(--gold);border-radius:6px;padding:0.4rem 0.75rem;cursor:pointer;font-size:0.85rem">☰ פילטרים</button>
+</header>
+
+<div class="app">
+  <aside>
+    <div class="sidebar-section">
+      <div class="sidebar-label">תצוגה</div>
+      <div class="sidebar-item active" data-filter="all" onclick="filterByStatus('all', this)">
+        📚 כל הספרים <span class="count" id="cnt-all">0</span>
+      </div>
+      <div class="sidebar-item" data-filter="read" onclick="filterByStatus('read', this)">
+        ✅ נקראו <span class="count" id="cnt-read">0</span>
+      </div>
+      <div class="sidebar-item" data-filter="reading" onclick="filterByStatus('reading', this)">
+        📖 קורא כעת <span class="count" id="cnt-reading">0</span>
+      </div>
+      <div class="sidebar-item" data-filter="unread" onclick="filterByStatus('unread', this)">
+        🕮 לא נקרא <span class="count" id="cnt-unread">0</span>
+      </div>
+      <div class="sidebar-item" data-filter="wishlist" onclick="filterByStatus('wishlist', this)">
+        ⭐ רשימת משאלות <span class="count" id="cnt-wishlist">0</span>
+      </div>
+      <div class="sidebar-item" data-filter="fav" onclick="filterByStatus('fav', this)">
+        ❤️ מועדפים <span class="count" id="cnt-fav">0</span>
+      </div>
+      <div class="sidebar-item" data-filter="dup" onclick="filterByStatus('dup', this)">
+        ⚠️ כפולים <span class="count" id="cnt-dup">0</span>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">ז׳אנרים</div>
+      <div id="genre-list"></div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="toolbar">
+      <div class="toolbar-left" id="rating-filters">
+        <button class="filter-btn active" onclick="filterByRating(0, this)">הכל</button>
+        <button class="filter-btn" onclick="filterByRating(5, this)">★★★★★</button>
+        <button class="filter-btn" onclick="filterByRating(4, this)">★★★★+</button>
+        <button class="filter-btn" onclick="filterByRating(3, this)">★★★+</button>
+      </div>
+      <select class="sort-select" id="sort-select" onchange="renderBooks()">
+        <option value="added">לפי הוספה</option>
+        <option value="title">לפי שם</option>
+        <option value="author">לפי מחבר</option>
+        <option value="year">לפי שנה</option>
+        <option value="rating">לפי דירוג</option>
+      </select>
+      <div class="view-toggle">
+        <button class="view-btn active" id="grid-btn" onclick="setView('grid')">⊞</button>
+        <button class="view-btn" id="list-btn" onclick="setView('list')">☰</button>
+      </div>
+    </div>
+
+    <div id="books-container" class="books-grid"></div>
+  </main>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="overlay" id="form-overlay" style="display:none" onclick="handleOverlayClick(event,'form-overlay')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('form-overlay')">✕</button>
+    <div class="modal-header">
+      <div class="modal-cover-preview" id="form-cover-preview">📖</div>
+      <div class="modal-title-group">
+        <div class="modal-book-title" id="form-preview-title">ספר חדש</div>
+        <div class="modal-book-author" id="form-preview-author">מחבר</div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="dup-warning" id="dup-warning">⚠️ ספר עם שם דומה כבר קיים בספרייה: <span id="dup-warning-title"></span></div>
+      <input type="hidden" id="form-id">
+      <div class="modal-grid">
+        <div class="form-group full">
+          <label class="form-label">שם הספר *</label>
+          <input class="form-input" id="f-title" placeholder="שם הספר" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">מחבר</label>
+          <input class="form-input" id="f-author" placeholder="שם המחבר" oninput="updatePreview()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">שנת הוצאה</label>
+          <input class="form-input" id="f-year" type="number" placeholder="2024">
+        </div>
+        <div class="form-group" style="position:relative">
+          <label class="form-label">ז׳אנר</label>
+          <input class="form-input" id="f-genre" placeholder="ספרות, מסתורין, היסטוריה..." autocomplete="off" oninput="showSuggestions('f-genre','genre-suggestions',getGenreSuggestions)" onfocus="showSuggestions('f-genre','genre-suggestions',getGenreSuggestions)">
+          <div id="genre-suggestions" class="autocomplete-list" style="display:none"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">שפה</label>
+          <select class="form-select" id="f-lang">
+            <option value="עברית">עברית</option>
+            <option value="אנגלית">אנגלית</option>
+            <option value="ערבית">ערבית</option>
+            <option value="צרפתית">צרפתית</option>
+            <option value="גרמנית">גרמנית</option>
+            <option value="רוסית">רוסית</option>
+            <option value="ספרדית">ספרדית</option>
+            <option value="אחר">אחר</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">סטטוס</label>
+          <select class="form-select" id="f-status">
+            <option value="unread">לא נקרא</option>
+            <option value="reading">קורא כעת</option>
+            <option value="read">נקרא</option>
+            <option value="wishlist">רשימת משאלות</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">דירוג</label>
+          <div class="rating-input" id="rating-input">
+            <button class="star-btn" data-val="1" onclick="setRating(1)">★</button>
+            <button class="star-btn" data-val="2" onclick="setRating(2)">★</button>
+            <button class="star-btn" data-val="3" onclick="setRating(3)">★</button>
+            <button class="star-btn" data-val="4" onclick="setRating(4)">★</button>
+            <button class="star-btn" data-val="5" onclick="setRating(5)">★</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">אמוג׳י שער</label>
+          <input class="form-input" id="f-emoji" placeholder="📖" maxlength="4">
+        </div>
+        <div class="form-group full">
+          <label class="form-label" style="display:flex;justify-content:space-between;align-items:center">
+            <span>תקציר</span>
+            <button type="button" onclick="fetchSynopsis()" id="synopsis-btn" style="font-size:0.75rem;padding:3px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--cream-dim);cursor:pointer">🔍 חפש אוטומטית</button>
+          </label>
+          <textarea class="form-textarea" id="f-synopsis" placeholder="תקציר הספר..." style="min-height:100px"></textarea>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">הערות אישיות</label>
+          <textarea class="form-textarea" id="f-notes" placeholder="מה חשבתי, ציטוטים אהובים, המלצה..."></textarea>
+        </div>
+        <div class="form-group full" style="position:relative">
+          <label class="form-label">מיקום על המדף</label>
+          <input class="form-input" id="f-location" placeholder="מדף עליון, חדר שינה..." autocomplete="off" oninput="showSuggestions('f-location','location-suggestions',getLocationSuggestions)" onfocus="showSuggestions('f-location','location-suggestions',getLocationSuggestions)">
+          <div id="location-suggestions" class="autocomplete-list" style="display:none"></div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-delete" id="delete-btn" onclick="deleteBook()" style="display:none">🗑 מחק</button>
+        <button class="btn-cancel" onclick="closeModal('form-overlay')">ביטול</button>
+        <button class="btn-save" onclick="saveBook()">שמור ספר</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCAN MODAL -->
+<div class="overlay" id="scan-overlay" style="display:none" onclick="handleOverlayClick(event,'scan-overlay')">
+  <div class="modal" style="max-width:620px" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('scan-overlay')">✕</button>
+    <div style="padding:1.5rem 1.5rem 0">
+      <div style="font-family:'Frank Ruhl Libre',serif;font-size:1.3rem;font-weight:900;color:var(--gold)">📷 סרוק ספרים מתמונה</div>
+      <div style="font-size:0.9rem;color:var(--text-dim);margin-top:0.25rem">צלמי את הספרים על המדף — ה-AI יזהה ויחפש את כל הפרטים אוטומטית</div>
+    </div>
+    <div class="modal-body">
+      <div id="scan-upload-zone">
+        <div class="scan-drop-zone" id="scan-drop-zone">
+          <input type="file" accept="image/*" id="scan-file-input" onchange="handleScanImage(event)">
+          <div class="scan-drop-icon">📸</div>
+          <div class="scan-drop-text">לחצי כאן להעלאת תמונה</div>
+          <div class="scan-drop-sub">או גררי תמונה לכאן · JPG, PNG, HEIC</div>
+        </div>
+      </div>
+      <div id="scan-working" style="display:none">
+        <img id="scan-preview-img" class="scan-preview-img" src="" alt="תמונה">
+        <div id="scan-status-area" class="scan-status">
+          <div class="scan-spinner"></div>
+          <div id="scan-status-text">מנתח את התמונה...</div>
+        </div>
+      </div>
+      <div id="scan-results-area" style="display:none">
+        <img id="scan-preview-img2" class="scan-preview-img" src="" alt="תמונה" style="max-height:140px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
+          <div style="font-size:0.85rem;color:var(--text-dim)">בחרי את הספרים להוסיף לספרייה:</div>
+          <button class="scan-select-all" onclick="scanSelectAll()">בחר הכל</button>
+        </div>
+        <div class="scan-results" id="scan-results-list"></div>
+        <div class="scan-location-row">
+          <label>📍 מיקום על המדף (לכל הספרים):</label>
+          <input class="form-input" id="scan-location" placeholder="מדף שינה, מדף עליון..." style="flex:1">
+        </div>
+        <div class="modal-actions" style="margin-top:1rem">
+          <button class="btn-cancel" onclick="resetScan()">↩ סרוק שוב</button>
+          <button class="btn-save" onclick="addScannedBooks()">✚ הוסף ספרים נבחרים</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="overlay" id="detail-overlay" style="display:none" onclick="handleOverlayClick(event,'detail-overlay')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('detail-overlay')">✕</button>
+    <div class="modal-header" id="detail-header"></div>
+    <div class="modal-body" id="detail-body"></div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────
+const GENRE_COLORS = {
+  'ספרות': '#8b6914', 'רומן': '#6b4e9e', 'מסתורין': '#1a5276',
+  'פשע': '#922b21', 'מדע בדיוני': '#1a7d5a', 'פנטזיה': '#6c3483',
+  'היסטוריה': '#7d5a1e', 'ביוגרפיה': '#2e6da4', 'פילוסופיה': '#4a4a4a',
+  'שירה': '#8e44ad', 'ילדים': '#e67e22', 'מדע': '#17a589',
+  'עסקים': '#2e4053', 'בישול': '#ca6f1e', 'נסיעות': '#117a65',
+  'פסיכולוגיה': '#5d6d7e', 'אחר': '#5d6d7e',
+};
+const COVER_GRADIENTS = [
+  ['#1a0a00','#5c3317'], ['#0a001a','#3d1a5c'], ['#001a0a','#1a5c3d'],
+  ['#1a0000','#5c1a1a'], ['#001a1a','#1a5c5c'], ['#1a1a00','#5c5c1a'],
+  ['#0a0a1a','#3d3d5c'], ['#1a0a0a','#5c3d3d'], ['#000a1a','#1a3d5c'],
+];
+
+let books = JSON.parse(localStorage.getItem('mybooks_v2') || '[]');
+let currentFilter = 'all';
+let currentGenreFilter = null;
+let currentRatingFilter = 0;
+let currentView = 'grid';
+let editingId = null;
+let formRating = 0;
+
+// demo data if empty
+if (books.length === 0) {
+  books = [
+    { id: 1, title: 'מאה שנים של בדידות', author: 'גבריאל גרסיה מרקס', year: 1967, genre: 'ספרות', lang: 'עברית', status: 'read', rating: 5, notes: 'אחד הספרים הגדולים שקראתי. ריאליזם מאגי מושלם.', location: 'מדף ראשי', emoji: '🦋', fav: true, added: Date.now()-86400000*10 },
+    { id: 2, title: 'הנסיך הקטן', author: 'אנטואן דה סנט-אכזופרי', year: 1943, genre: 'ספרות', lang: 'עברית', status: 'read', rating: 5, notes: 'יפה להפליא. לא רק לילדים.', location: 'מדף ראשי', emoji: '🌹', fav: true, added: Date.now()-86400000*8 },
+    { id: 3, title: 'האחים קרמזוב', author: 'פיודור דוסטויבסקי', year: 1880, genre: 'פילוסופיה', lang: 'עברית', status: 'reading', rating: 0, notes: 'קורא לאט, כל פרק מצריך עיכול.', location: 'שולחן ליד המיטה', emoji: '🕯️', fav: false, added: Date.now()-86400000*3 },
+    { id: 4, title: 'הר הקסמים', author: 'תומס מאן', year: 1924, genre: 'ספרות', lang: 'עברית', status: 'unread', rating: 0, notes: '', location: 'מדף שני', emoji: '⛰️', fav: false, added: Date.now()-86400000*5 },
+    { id: 5, title: 'עוברת אורח', author: 'עגנון ש"י', year: 1945, genre: 'ספרות', lang: 'עברית', status: 'read', rating: 4, notes: '', location: 'מדף עברית', emoji: '🌿', fav: false, added: Date.now()-86400000*15 },
+    { id: 6, title: 'הכוחות המניעים', author: 'דניאל קנמן', year: 2011, genre: 'פסיכולוגיה', lang: 'עברית', status: 'read', rating: 4, notes: 'שינה את הדרך שאני חושב על קבלת החלטות.', location: 'מדף עיון', emoji: '🧠', fav: false, added: Date.now()-86400000*20 },
+    { id: 7, title: 'Dune', author: 'Frank Herbert', year: 1965, genre: 'מדע בדיוני', lang: 'אנגלית', status: 'read', rating: 5, notes: 'Epic. Nothing like it.', location: 'מדף sci-fi', emoji: '🏜️', fav: true, added: Date.now()-86400000*30 },
+    { id: 8, title: 'המאסטר ומרגריטה', author: 'מיכאיל בולגקוב', year: 1967, genre: 'פנטזיה', lang: 'עברית', status: 'wishlist', rating: 0, notes: 'ממליצים עליו מכל עבר', location: '', emoji: '🐱', fav: false, added: Date.now()-86400000*1 },
+  ];
+  save();
+}
+
+function save() {
+  localStorage.setItem('mybooks_v2', JSON.stringify(books));
+}
+
+// ─── EXPORT / IMPORT ────────────────────────────────────────────
+function exportBooks() {
+  const date = new Date().toISOString().slice(0,10);
+  const filename = `ספרייה_שלי_${date}.json`;
+  const data = JSON.stringify({ version: 2, exported: new Date().toISOString(), count: books.length, books }, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+  showToast(`☁️ הורד קובץ גיבוי עם ${books.length} ספרים — שמור ב-Google Drive!`);
+}
+
+function importBooks(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      const imported = data.books || data;
+      if (!Array.isArray(imported)) throw new Error('פורמט לא תקין');
+      // merge by id first, then by title+author
+      const existingById = {};
+      const existingByKey = {};
+      books.forEach(b => {
+        existingById[String(b.id)] = b;
+        existingByKey[(b.title||'').trim().toLowerCase() + '|' + (b.author||'').trim().toLowerCase()] = b;
+      });
+      const toAdd = [];
+      let updated = 0;
+      imported.forEach(b => {
+        const byId = existingById[String(b.id)];
+        const byKey = existingByKey[(b.title||'').trim().toLowerCase() + '|' + (b.author||'').trim().toLowerCase()];
+        const existing = byId || byKey;
+        if (existing) {
+          if (b.synopsis && !existing.synopsis) {
+            existing.synopsis = b.synopsis;
+            updated++;
+          }
+        } else {
+          toAdd.push(b);
+        }
+      });
+      const now = Date.now();
+      toAdd.forEach((b, i) => { b.added = now + i; });
+      books = [...toAdd.reverse(), ...books];
+      showToast(`✅ ${toAdd.length} ספרים חדשים · ${updated} תקצירים עודכנו`);
+      save();
+      renderBooks();
+    } catch(err) {
+      showToast('❌ שגיאה בקריאת הקובץ — ודא שזה קובץ גיבוי תקין');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function genId() { return Date.now() + Math.random(); }
+
+function getCoverStyle(book) {
+  const idx = Math.abs([...book.title].reduce((a,c) => a+c.charCodeAt(0),0)) % COVER_GRADIENTS.length;
+  const [c1,c2] = COVER_GRADIENTS[idx];
+  return `background: linear-gradient(160deg, ${c1}, ${c2})`;
+}
+
+function starsHtml(n, small) {
+  const sz = small ? '' : 'font-size:1rem;';
+  return `<span style="${sz}color:var(--gold)">${'★'.repeat(n)}${'☆'.repeat(5-n)}</span>`;
+}
+
+function statusBadge(s) {
+  const map = { read: ['status-read','נקרא'], reading: ['status-reading','קורא'], unread: ['status-unread','לא נקרא'], wishlist: ['status-wishlist','רשימת משאלות'] };
+  const [cls, lbl] = map[s] || ['status-unread', s];
+  return `<span class="status-badge ${cls}">${lbl}</span>`;
+}
+
+// ─── FILTER / SORT ───────────────────────────────────────────────
+function getFiltered() {
+  const q = document.getElementById('search-input').value.trim().toLowerCase();
+
+  let list = [...books];
+
+  // if searching — ignore all other filters, search everything
+  if (q) {
+    list = list.filter(b =>
+      (b.title||'').toLowerCase().includes(q) ||
+      (b.author||'').toLowerCase().includes(q) ||
+      (b.genre||'').toLowerCase().includes(q) ||
+      (b.notes||'').toLowerCase().includes(q) ||
+      (b.synopsis||'').toLowerCase().includes(q) ||
+      (b.location||'').toLowerCase().includes(q)
+    );
+  } else {
+    // not searching — apply status and genre filters normally
+    if (currentFilter === 'fav') list = list.filter(b => b.fav);
+    else if (currentFilter === 'dup') list = list.filter(b => window._dupIds && window._dupIds.has(b.id));
+    else if (currentFilter !== 'all') list = list.filter(b => b.status === currentFilter);
+
+    if (currentGenreFilter) list = list.filter(b => (b.genre||'').trim().toLowerCase() === currentGenreFilter.trim().toLowerCase());
+
+    if (currentRatingFilter > 0) list = list.filter(b => b.rating >= currentRatingFilter);
+  }
+
+  // sort
+  const s = document.getElementById('sort-select').value;
+  if (s === 'title') list.sort((a,b) => a.title.localeCompare(b.title,'he'));
+  else if (s === 'author') list.sort((a,b) => (a.author||'').localeCompare(b.author||'','he'));
+  else if (s === 'year') list.sort((a,b) => (b.year||0)-(a.year||0));
+  else if (s === 'rating') list.sort((a,b) => b.rating-a.rating);
+  else list.sort((a,b) => (b.added||0)-(a.added||0));
+  return list;
+}
+
+function filterByStatus(f, el) {
+  if (window.innerWidth <= 700) { document.querySelector('aside').classList.remove('open'); }
+  currentFilter = f;
+  document.getElementById('search-input').value = '';
+  document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  currentGenreFilter = null;
+  document.querySelectorAll('.genre-filter-item').forEach(i => i.classList.remove('active'));
+  renderBooks();
+}
+
+function filterByGenre(g, el) {
+  if (window.innerWidth <= 700) { document.querySelector('aside').classList.remove('open'); }
+  document.getElementById('search-input').value = '';
+  if (currentGenreFilter === g) {
+    currentGenreFilter = null;
+    el.classList.remove('active');
+  } else {
+    currentGenreFilter = g;
+    document.querySelectorAll('.genre-filter-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+  }
+  renderBooks();
+}
+
+function filterByRating(r, el) {
+  currentRatingFilter = r;
+  document.querySelectorAll('#rating-filters .filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderBooks();
+}
+
+function setView(v) {
+  currentView = v;
+  document.getElementById('grid-btn').classList.toggle('active', v==='grid');
+  document.getElementById('list-btn').classList.toggle('active', v==='list');
+  const c = document.getElementById('books-container');
+  c.className = v === 'grid' ? 'books-grid' : 'books-list';
+  renderBooks();
+}
+
+// ─── RENDER ─────────────────────────────────────────────────────
+function renderBooks() {
+  window._dupIds = getDuplicateTitles();
+  updateStats();
+  renderGenres();
+  const list = getFiltered();
+  const container = document.getElementById('books-container');
+
+  if (list.length === 0) {
+    container.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-icon">📭</div>
+      <h3>לא נמצאו ספרים</h3>
+      <p>נסה לשנות את הפילטר או להוסיף ספרים חדשים</p>
+    </div>`;
+    return;
+  }
+
+  if (currentView === 'grid') {
+    container.innerHTML = list.map(book => renderCardGrid(book)).join('');
+  } else {
+    container.innerHTML = list.map(book => renderCardList(book)).join('');
+  }
+}
+
+function getDuplicateTitles() {
+  const titleMap = {};
+  books.forEach(b => {
+    const key = (b.title||'').trim().toLowerCase();
+    if (!titleMap[key]) titleMap[key] = [];
+    titleMap[key].push(b.id);
+  });
+  const dupIds = new Set();
+  Object.values(titleMap).forEach(ids => { if (ids.length > 1) ids.forEach(id => dupIds.add(id)); });
+  return dupIds;
+}
+
+function renderCardGrid(b) {
+  const isDup = window._dupIds && window._dupIds.has(b.id);
+  return `<div class="book-card" onclick="openDetail(${b.id})">
+    <div class="book-cover" style="${getCoverStyle(b)}">
+      <div class="book-spine" style="background:var(--gold)"></div>
+      <div class="book-cover-inner">
+        <span style="font-size:2rem">${b.emoji||'📖'}</span>
+        <div class="book-cover-title">${b.title}</div>
+        <div class="book-cover-author">${b.author||''}</div>
+      </div>
+    </div>
+    ${isDup ? '<div class="dup-badge">כפול</div>' : ''}
+    <button class="card-fav ${b.fav?'fav':''}" onclick="event.stopPropagation();toggleFav(${b.id})" title="מועדף">${b.fav?'❤️':'🤍'}</button>
+    <div class="book-info">
+      <div class="book-title">${b.title}</div>
+      <div class="book-author">${b.author||'—'}</div>
+      <div class="book-meta">
+        ${statusBadge(b.status)}
+        ${b.rating ? `<div class="rating-stars">${'★'.repeat(b.rating)}</div>` : ''}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderCardList(b) {
+  return `<div class="book-row" onclick="openDetail(${b.id})">
+    <div class="row-emoji">${b.emoji||'📖'}</div>
+    <div class="row-main">
+      <div class="row-title">${b.title}</div>
+      <div class="row-sub">${b.author||'—'} ${b.year ? `· ${b.year}` : ''}</div>
+    </div>
+    <div class="row-genre"><span style="color:${GENRE_COLORS[b.genre]||'#888'}">${b.genre||''}</span></div>
+    <div class="row-right">
+      ${b.rating ? starsHtml(b.rating, true) : ''}
+      ${statusBadge(b.status)}
+      ${b.fav ? '<span title="מועדף">❤️</span>' : ''}
+    </div>
+  </div>`;
+}
+
+function updateStats() {
+  document.getElementById('stat-total').textContent = books.length;
+  document.getElementById('stat-read').textContent = books.filter(b=>b.status==='read').length;
+  document.getElementById('stat-reading').textContent = books.filter(b=>b.status==='reading').length;
+
+  const counts = {
+    all: books.length,
+    read: books.filter(b=>b.status==='read').length,
+    reading: books.filter(b=>b.status==='reading').length,
+    unread: books.filter(b=>b.status==='unread').length,
+    wishlist: books.filter(b=>b.status==='wishlist').length,
+    fav: books.filter(b=>b.fav).length,
+    dup: window._dupIds ? window._dupIds.size : 0,
+  };
+  Object.entries(counts).forEach(([k,v]) => {
+    const el = document.getElementById('cnt-'+k);
+    if (el) el.textContent = v;
+  });
+}
+
+function renderGenres() {
+  const genres = {};
+  books.forEach(b => { if(b.genre) { const g = b.genre.trim(); genres[g] = (genres[g]||0)+1; } });
+  const sorted = Object.entries(genres).sort((a,b)=>b[1]-a[1]);
+  const genreList = document.getElementById('genre-list');
+  genreList.innerHTML = '';
+  sorted.forEach(([g,c]) => {
+    const div = document.createElement('div');
+    div.className = 'sidebar-item genre-filter-item' + (currentGenreFilter===g?' active':'');
+    div.innerHTML = `<span class="genre-dot" style="background:${GENRE_COLORS[g]||'#888'}"></span>${g} <span class="count">${c}</span>`;
+    div.addEventListener('click', function() { filterByGenre(g, div); });
+    genreList.appendChild(div);
+  });
+}
+
+// ─── DETAIL ─────────────────────────────────────────────────────
+function openDetail(id) {
+  const b = books.find(x=>x.id===id);
+  if (!b) return;
+
+  document.getElementById('detail-header').innerHTML = `
+    <div class="modal-cover-preview" style="${getCoverStyle(b)};align-items:center;justify-content:center;font-size:2rem">
+      ${b.emoji||'📖'}
+    </div>
+    <div class="modal-title-group">
+      <div class="modal-book-title">${b.title}</div>
+      <div class="modal-book-author">${b.author||'לא ידוע'}</div>
+      <div style="margin-top:0.5rem">${starsHtml(b.rating,false)}</div>
+    </div>
+  `;
+
+  const readPct = b.status==='read'?100:b.status==='reading'?Math.floor(Math.random()*40+20):0;
+
+  document.getElementById('detail-body').innerHTML = `
+    <div class="detail-stats">
+      <div class="detail-stat">
+        <div class="detail-stat-val">${b.year||'—'}</div>
+        <div class="detail-stat-lbl">שנת הוצאה</div>
+      </div>
+      <div class="detail-stat">
+        <div class="detail-stat-val">${b.lang||'—'}</div>
+        <div class="detail-stat-lbl">שפה</div>
+      </div>
+      <div class="detail-stat">
+        <div class="detail-stat-val">${b.genre||'—'}</div>
+        <div class="detail-stat-lbl">ז׳אנר</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.75rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap">
+      ${statusBadge(b.status)}
+      ${b.fav ? '<span>❤️ מועדף</span>' : ''}
+      ${b.location ? `<span style="font-size:0.85rem;color:var(--text-dim)">📍 ${b.location}</span>` : ''}
+    </div>
+    ${b.synopsis ? `<div style="margin-bottom:0.75rem"><div style="font-size:0.7rem;letter-spacing:0.1em;color:var(--text-dim);text-transform:uppercase;margin-bottom:0.4rem">תקציר</div><div style="font-size:0.95rem;color:var(--cream-dim);line-height:1.6;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.85rem">${b.synopsis}</div></div>` : ''}
+    ${b.notes ? `<div class="detail-notes">"${b.notes}"</div>` : ''}
+    <div class="detail-actions">
+      <button class="btn-edit" onclick="openEditModal(${b.id})">✏️ ערוך</button>
+      <button class="btn-cancel" onclick="toggleFav(${b.id});openDetail(${b.id})">${b.fav?'💔 הסר ממועדפים':'❤️ הוסף למועדפים'}</button>
+    </div>
+  `;
+
+  document.getElementById('detail-overlay').style.display = 'flex';
+}
+
+// ─── FORM ────────────────────────────────────────────────────────
+function openAddModal() {
+  editingId = null;
+  formRating = 0;
+  document.getElementById('form-id').value = '';
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-author').value = '';
+  document.getElementById('f-year').value = '';
+  document.getElementById('f-genre').value = '';
+  document.getElementById('f-lang').value = 'עברית';
+  document.getElementById('f-status').value = 'unread';
+  document.getElementById('f-emoji').value = '';
+  document.getElementById('f-synopsis').value = '';
+  document.getElementById('f-notes').value = '';
+  document.getElementById('f-location').value = '';
+  document.getElementById('delete-btn').style.display = 'none';
+  updateStars(0);
+  updatePreview();
+  document.getElementById('form-overlay').style.display = 'flex';
+}
+
+function openEditModal(id) {
+  closeModal('detail-overlay');
+  const b = books.find(x=>x.id===id);
+  if (!b) return;
+  editingId = id;
+  formRating = b.rating||0;
+  document.getElementById('f-title').value = b.title||'';
+  document.getElementById('f-author').value = b.author||'';
+  document.getElementById('f-year').value = b.year||'';
+  document.getElementById('f-genre').value = b.genre||'';
+  document.getElementById('f-lang').value = b.lang||'עברית';
+  document.getElementById('f-status').value = b.status||'unread';
+  document.getElementById('f-emoji').value = b.emoji||'';
+  document.getElementById('f-synopsis').value = b.synopsis||'';
+  document.getElementById('f-notes').value = b.notes||'';
+  document.getElementById('f-location').value = b.location||'';
+  document.getElementById('delete-btn').style.display = 'inline-flex';
+  updateStars(formRating);
+  updatePreview();
+  document.getElementById('form-overlay').style.display = 'flex';
+}
+
+function updatePreview() {
+  const t = document.getElementById('f-title').value || 'ספר חדש';
+  const a = document.getElementById('f-author').value || 'מחבר';
+  document.getElementById('form-preview-title').textContent = t;
+  document.getElementById('form-preview-author').textContent = a;
+  const emoji = document.getElementById('f-emoji').value || '📖';
+  document.getElementById('form-cover-preview').textContent = emoji;
+  document.getElementById('form-cover-preview').style = getCoverStyle({title:t}) + ';display:flex;align-items:center;justify-content:center;font-size:2rem';
+
+  // check for duplicates while typing
+  const q = t.trim().toLowerCase();
+  if (q.length > 1) {
+    const dups = books.filter(b => b.id !== editingId && (b.title||'').toLowerCase().includes(q));
+    const warn = document.getElementById('dup-warning');
+    if (dups.length) {
+      document.getElementById('dup-warning-title').textContent = dups.map(b => `"${b.title}"`).join(', ');
+      warn.style.display = 'block';
+    } else {
+      warn.style.display = 'none';
+    }
+  } else {
+    document.getElementById('dup-warning').style.display = 'none';
+  }
+}
+
+function setRating(r) { formRating = (formRating===r)?0:r; updateStars(formRating); }
+function updateStars(r) {
+  document.querySelectorAll('.star-btn').forEach(b => {
+    b.classList.toggle('lit', parseInt(b.dataset.val) <= r);
+  });
+}
+
+function saveBook() {
+  const title = document.getElementById('f-title').value.trim();
+  if (!title) { showToast('נא להזין שם ספר'); return; }
+
+  const data = {
+    title,
+    author: document.getElementById('f-author').value.trim(),
+    year: parseInt(document.getElementById('f-year').value)||null,
+    genre: document.getElementById('f-genre').value.trim(),
+    lang: document.getElementById('f-lang').value,
+    status: document.getElementById('f-status').value,
+    rating: formRating,
+    emoji: document.getElementById('f-emoji').value.trim()||'📖',
+    synopsis: document.getElementById('f-synopsis').value.trim(),
+    notes: document.getElementById('f-notes').value.trim(),
+    location: document.getElementById('f-location').value.trim(),
+  };
+
+  if (editingId) {
+    const idx = books.findIndex(b=>b.id===editingId);
+    books[idx] = { ...books[idx], ...data };
+    showToast('✅ הספר עודכן');
+  } else {
+    books.unshift({ id: genId(), ...data, fav: false, added: Date.now() });
+    showToast('📚 הספר נוסף לספרייה');
+  }
+  save();
+  closeModal('form-overlay');
+  renderBooks();
+}
+
+function deleteBook() {
+  if (!confirm('למחוק את הספר?')) return;
+  books = books.filter(b=>b.id!==editingId);
+  save();
+  closeModal('form-overlay');
+  renderBooks();
+  showToast('🗑 הספר נמחק');
+}
+
+function toggleFav(id) {
+  const b = books.find(x=>x.id===id);
+  if (b) { b.fav = !b.fav; save(); renderBooks(); }
+}
+
+function closeModal(id) { document.getElementById(id).style.display='none'; }
+function handleOverlayClick(e, id) { if(e.target===e.currentTarget) closeModal(id); }
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast'; t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 2500);
+}
+
+// ─── SCAN ────────────────────────────────────────────────────────
+let scannedBooks = [];
+
+function openScanModal() {
+  resetScan();
+  document.getElementById('scan-overlay').style.display = 'flex';
+}
+
+function resetScan() {
+  scannedBooks = [];
+  document.getElementById('scan-upload-zone').style.display = 'block';
+  document.getElementById('scan-working').style.display = 'none';
+  document.getElementById('scan-results-area').style.display = 'none';
+  document.getElementById('scan-file-input').value = '';
+}
+
+// drag & drop
+const dropZone = document.getElementById('scan-drop-zone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault(); dropZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) processScanFile(file);
+});
+
+function handleScanImage(event) {
+  const file = event.target.files[0];
+  if (file) processScanFile(file);
+}
+
+function processScanFile(file) {
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const base64 = e.target.result;
+    const base64Data = base64.split(',')[1];
+    const mediaType = file.type || 'image/jpeg';
+
+    // show working state
+    document.getElementById('scan-upload-zone').style.display = 'none';
+    document.getElementById('scan-working').style.display = 'block';
+    document.getElementById('scan-preview-img').src = base64;
+    document.getElementById('scan-status-text').textContent = 'מזהה ספרים בתמונה...';
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{
+            role: 'user',
+            content: [
+              {
+                type: 'image',
+                source: { type: 'base64', media_type: mediaType, data: base64Data }
+              },
+              {
+                type: 'text',
+                text: `Look at this image of books. Identify every book you can see — read the titles and authors from the spines or covers.
+For each book, return a JSON array (and ONLY the JSON array, no other text) like this:
+[
+  {
+    "title": "שם הספר",
+    "author": "שם המחבר",
+    "year": 1984,
+    "genre": "ספרות",
+    "lang": "עברית",
+    "emoji": "📖"
+  }
+]
+Rules:
+- Return titles and authors in the language they appear on the book
+- For genre use one of: ספרות, רומן, מסתורין, פשע, מדע בדיוני, פנטזיה, היסטוריה, ביוגרפיה, פילוסופיה, שירה, ילדים, מדע, עסקים, בישול, פסיכולוגיה, אחר
+- For lang: עברית / אנגלית / ערבית / צרפתית / גרמנית / רוסית / ספרדית / אחר
+- For year: best guess based on your knowledge, or null if unknown
+- Pick a fitting emoji for the book's theme
+- If you can't identify a book clearly, skip it
+- Return ONLY the JSON array`
+              }
+            ]
+          }]
+        })
+      });
+
+      const data = await response.json();
+      const text = data.content?.map(c => c.text || '').join('') || '';
+
+      let parsed = [];
+      try {
+        const clean = text.replace(/```json|```/g, '').trim();
+        parsed = JSON.parse(clean);
+      } catch {
+        throw new Error('לא הצלחתי לפענח את תשובת ה-AI');
+      }
+
+      if (!parsed.length) throw new Error('לא זוהו ספרים בתמונה');
+
+      scannedBooks = parsed.map((b, i) => ({ ...b, _selected: true, _idx: i }));
+      showScanResults(base64);
+
+    } catch (err) {
+      document.getElementById('scan-status-area').innerHTML = `
+        <div style="color:#e05050;font-size:0.95rem">❌ ${err.message || 'שגיאה בעיבוד התמונה'}</div>
+        <button class="btn-cancel" onclick="resetScan()" style="margin-top:1rem">נסי שוב</button>
+      `;
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function showScanResults(base64) {
+  document.getElementById('scan-working').style.display = 'none';
+  document.getElementById('scan-results-area').style.display = 'block';
+  document.getElementById('scan-preview-img2').src = base64;
+
+  const list = document.getElementById('scan-results-list');
+  list.innerHTML = scannedBooks.map((b, i) => `
+    <div class="scan-result-item ${b._selected ? 'selected' : ''}" id="scan-item-${i}">
+      <label>
+        <input type="checkbox" ${b._selected ? 'checked' : ''} onchange="toggleScanItem(${i}, this.checked)" style="accent-color:var(--gold);width:16px;height:16px;flex-shrink:0">
+        <div class="scan-result-info">
+          <div class="scan-result-title">${b.emoji || '📖'} ${b.title}</div>
+          <div class="scan-result-sub">${b.author || ''}${b.year ? ` · ${b.year}` : ''}</div>
+          <div class="scan-result-tags">
+            ${b.genre ? `<span class="scan-tag">${b.genre}</span>` : ''}
+            ${b.lang ? `<span class="scan-tag">${b.lang}</span>` : ''}
+          </div>
+        </div>
+      </label>
+    </div>
+  `).join('');
+}
+
+function toggleScanItem(i, checked) {
+  scannedBooks[i]._selected = checked;
+  document.getElementById('scan-item-' + i).classList.toggle('selected', checked);
+}
+
+function scanSelectAll() {
+  scannedBooks.forEach((b, i) => {
+    b._selected = true;
+    const el = document.getElementById('scan-item-' + i);
+    if (el) { el.classList.add('selected'); el.querySelector('input').checked = true; }
+  });
+}
+
+function addScannedBooks() {
+  const location = document.getElementById('scan-location').value.trim();
+  const toAdd = scannedBooks.filter(b => b._selected);
+  if (!toAdd.length) { showToast('לא נבחרו ספרים'); return; }
+
+  const existing = new Set(books.map(b => b.title.trim().toLowerCase() + '|' + (b.author || '').trim().toLowerCase()));
+  let added = 0, skipped = 0;
+
+  toAdd.forEach(b => {
+    const key = b.title.trim().toLowerCase() + '|' + (b.author || '').trim().toLowerCase();
+    if (existing.has(key)) { skipped++; return; }
+    books.unshift({
+      id: genId(),
+      title: b.title, author: b.author || '',
+      year: b.year || null, genre: b.genre || '',
+      lang: b.lang || 'אחר', status: 'unread',
+      rating: 0, emoji: b.emoji || '📖',
+      notes: '', location: location,
+      fav: false, added: Date.now()
+    });
+    existing.add(key);
+    added++;
+  });
+
+  save();
+  renderBooks();
+  closeModal('scan-overlay');
+  showToast(`✅ נוספו ${added} ספרים${skipped ? ` · ${skipped} כבר קיימים` : ''}`);
+}
+
+// ─── AUTOCOMPLETE ────────────────────────────────────────────────
+function getGenreSuggestions(q) {
+  const all = [...new Set(books.map(b => b.genre).filter(Boolean))].sort();
+  return q ? all.filter(g => g.includes(q)) : all;
+}
+
+function getLocationSuggestions(q) {
+  const all = [...new Set(books.map(b => b.location).filter(Boolean))].sort();
+  return q ? all.filter(l => l.includes(q)) : all;
+}
+
+function showSuggestions(inputId, listId, getFn) {
+  const input = document.getElementById(inputId);
+  const list = document.getElementById(listId);
+  const q = input.value.trim();
+  const suggestions = getFn(q);
+  if (!suggestions.length) { list.style.display = 'none'; return; }
+  list.innerHTML = '';
+  suggestions.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'autocomplete-item';
+    div.textContent = s;
+    div.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      input.value = s;
+      list.style.display = 'none';
+    });
+    list.appendChild(div);
+  });
+  list.style.display = 'block';
+}
+
+function hideSuggestions(listId) {
+  setTimeout(() => {
+    const el = document.getElementById(listId);
+    if (el) el.style.display = 'none';
+  }, 150);
+}
+
+function pickSuggestion(inputId, listId, value) {
+  document.getElementById(inputId).value = value;
+  document.getElementById(listId).style.display = 'none';
+}
+
+// close autocomplete only when clicking outside
+document.addEventListener('mousedown', e => {
+  ['genre','location'].forEach(field => {
+    const input = document.getElementById('f-' + field);
+    const list = document.getElementById(field + '-suggestions');
+    if (list && input && !input.contains(e.target) && !list.contains(e.target)) {
+      list.style.display = 'none';
+    }
+  });
+});
+
+// search
+
+// keyboard
+document.addEventListener('keydown', e => {
+  if (e.key==='Escape') {
+    closeModal('form-overlay');
+    closeModal('detail-overlay');
+    closeModal('scan-overlay');
+  }
+});
+
+// init
+document.getElementById('sort-select').value = 'added';
+renderBooks();
+
+function fetchSynopsis() {
+  const title = document.getElementById('f-title').value.trim();
+  const author = document.getElementById('f-author').value.trim();
+  if (!title) { showToast('⚠️ הכניסי קודם שם ספר'); return; }
+  const btn = document.getElementById('synopsis-btn');
+  btn.textContent = '⏳ מחפש...';
+  btn.disabled = true;
+
+  const cbName = 'sc_' + Date.now();
+  const url = 'https://script.google.com/macros/s/AKfycbzZJr2hFPahZLRFkMp-B5rhkonApyzVPjtZPv-vl7UameNUSJkk4ARcZNT9bQcDRjQm/exec'
+    + '?action=synopsis'
+    + '&title=' + encodeURIComponent(title)
+    + '&author=' + encodeURIComponent(author)
+    + '&callback=' + cbName;
+
+  const done = function(data) {
+    if (data && data.ok && data.synopsis) {
+      document.getElementById('f-synopsis').value = data.synopsis;
+      showToast('✅ תקציר נמצא!');
+    } else {
+      showToast('❌ לא נמצא תקציר');
+    }
+    btn.textContent = '🔍 חפש אוטומטית';
+    btn.disabled = false;
+    if (window[cbName]) delete window[cbName];
+    const s = document.getElementById(cbName);
+    if (s) s.remove();
+  };
+
+  window[cbName] = done;
+
+  const script = document.createElement('script');
+  script.id = cbName;
+  script.src = url;
+  script.onerror = function() { done(null); };
+  document.head.appendChild(script);
+
+  setTimeout(function() {
+    if (window[cbName]) { done(null); }
+  }, 15000);
+}
+
+function toggleMobileMenu() {
+  const aside = document.querySelector('aside');
+  aside.classList.toggle('open');
+}
+
+function closeMobileMenu() {
+  const aside = document.querySelector('aside');
+  aside.classList.remove('open');
+}
+</script>
+</body>
+</html>
